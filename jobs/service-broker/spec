@@ -1,0 +1,89 @@
+---
+name: service-broker
+
+templates:
+  bin/service_ctl.erb: bin/service_ctl
+  config/application.yml.erb: config/application.yml
+
+packages: 
+- java
+- common
+- service-broker
+
+consumes:
+- name: brokerdb_link
+  type: dbconn
+
+properties:
+  java_opts:
+    description: "Java options"
+    default: "-Xms1024m -Xmx1024m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m"
+  port:
+    description: "service broker server port"
+    default: 8080
+  logging.level_root:
+    description: "root logging level"
+    default: INFO
+  logging.level_broker:
+    description: "broker logging level"
+    default: INFO
+  logging.level_hibernate:
+    description: "hibernate logging level"
+    default: INFO
+  dashboard.url:
+    description: "A URI for the service dashboard"
+    default: "http://DASHBOARD-URL/TAIGA/"
+  services.id:
+    description: "An identifier used to correlate this service in future requests to the broker"
+    default: "c5faa532-c467-417e-b1fc-e61c1c55844e"
+  services.name:
+    description: "A CLI-friendly name of the service. All lowercase, no spaces"
+    default: "app-lifecycle"
+  services.description:
+    description: "A short description of the service"
+    default: "A PaaS-TA App LifeCycle Service for application development."
+  services.bindable:
+    description: "Specifies whether service instances of the service can be bound to applications"
+    default: false
+  services.metadata.displayName:
+    description: "The name of the service to be displayed in graphical clients"
+    default: "App LifeCycle Service"
+  services.metadata.imageUrl:
+    description: "The URL to an image or a data URL containing an image"
+    default: "data:image/png;base64,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"
+  services.metadata.longDescription:
+    description: "Long description"
+    default: "Paasta App LifeCycle Service"
+  services.metadata.providerDisplayName:
+    description: "The name of the upstream entity providing the actual service"
+    default: "PaaS-TA"
+  services.metadata.documentationUrl:
+    description: "Link to documentation page for the service"
+    default: "https://paas-ta.kr/"
+  services.metadata.supportUrl:
+    description: "Link to support page for the service"
+    default: "https://paas-ta.kr"
+  services.plan_updatable:
+    description: "Whether the service supports upgrade/downgrade for some plans"
+    default: false
+  services.plans.id:
+    description: "An identifier used to correlate this plan in future requests to the broker"
+    default: "89d5f676-2a14-4f25-bd28-2a263318aa4b"
+  services.plans.name:
+    description: "The CLI-friendly name of the plan. MUST be unique within the service"
+    default: "dedicated-vm"
+  services.plans.description:
+    description: "A short description of the plan. MUST be a non-empty string"
+    default: "This is a free service plan."
+  services.plans.costs_usd:
+    description: "describes the costs of a service - currency (USD)"
+    default: 0.0
+  services.plans.costs_krw:
+    description: "describes the costs of a service - currency (KRW)"
+    default: 0.0
+  services.plans.costs_unit:
+    description: "describes the costs of a service - unit of measure"
+    default: "free"
+  services.plans.free:
+    description: "When false, service instances of this plan have a cost. The default is true."
+    default: true

@@ -1,0 +1,7 @@
+---
+name: service-broker
+
+dependencies: []
+
+files:
+- service-broker/paasta-app-lifecycle-service-broker.jar

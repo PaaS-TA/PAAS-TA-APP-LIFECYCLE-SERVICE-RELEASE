@@ -1,0 +1,5 @@
+set -e -x
+
+SRC_NAME="service-broker/paasta-app-lifecycle-service-broker.jar"
+
+cp -a ${SRC_NAME} ${BOSH_INSTALL_TARGET}

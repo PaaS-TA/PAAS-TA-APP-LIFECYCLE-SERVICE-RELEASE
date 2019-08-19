@@ -1,0 +1,7 @@
+---
+name: mariadb
+
+dependencies: []
+
+files:
+- mariadb/mariadb-10.3.15-linux-x86_64.tar.gz
