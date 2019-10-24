@@ -13,9 +13,9 @@ src
     ├── app-lifecycle  
     │   ├── taiga-back-4.2.12.tar.gz  
     │   └── taiga-front-dist-4.2.12-stable.tar.gz  
-    ├── common
-    │   ├── pid_utils.sh
-    │   └── syslog_utils.sh
+    ├── common  
+    │   ├── pid_utils.sh  
+    │   └── syslog_utils.sh  
     ├── java  
     │   └── OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz  
     ├── mariadb  
