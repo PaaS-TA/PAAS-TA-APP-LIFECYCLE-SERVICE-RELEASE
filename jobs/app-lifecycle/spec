@@ -1,0 +1,33 @@
+---
+name: app-lifecycle
+
+templates: 
+  bin/service_ctl.erb: bin/service_ctl
+  bin/pre-start.erb: bin/pre-start
+  bin/post-deploy.erb: bin/post-deploy
+  config/local.py.erb: config/local.py
+  config/taiga-circus.ini.erb: config/taiga-circus.ini
+  config/conf.json.erb: config/conf.json
+  config/taiga-nginx.conf.erb: config/taiga-nginx.conf
+  config/mime.types: config/mime.types
+  config/initial_user.json.erb: config/initial_user.json
+
+packages:
+- common
+- nginx
+- app-lifecycle
+
+consumes:
+- name: brokerdb_link
+  type: dbconn
+
+properties:
+  service.admin_password:
+    description: "service super admin password"
+    default: "Service!"
+  service.init_password:
+    description: "service admin user initial password"
+    default: "Service!"
+  service.service_admin:
+    description: "service admin user"
+    default: "serviceadmin"

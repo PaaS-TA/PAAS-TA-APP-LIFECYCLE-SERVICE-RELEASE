@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -e -u
+
+JOB_NAME=app-lifecycle
+SCRIPT_NAME=$(basename $0)
+PKG_DIR_NGINX=/var/vcap/packages/nginx
+JOB_DIR=/var/vcap/jobs/${JOB_NAME}
+LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
+RUN_DIR=/var/vcap/sys/run/${JOB_NAME}
+PIDFILE=${RUN_DIR}/${JOB_NAME}.pid
+
+source /var/vcap/packages/common/syslog_utils.sh
+source /var/vcap/packages/common/pid_utils.sh
+
+tee_output_to_sys_log_and_file ${LOG_DIR} ${SCRIPT_NAME}
+
+case $1 in
+
+  start)
+
+    echo "##### STARTING :: APP-LIFECYCLE :: PIDFILE :: ${PIDFILE}"
+    echo "##### STARTING :: APP-LIFECYCLE :: PKG_DIR_NGINX :: ${PKG_DIR_NGINX}"
+    echo "##### STARTING :: APP-LIFECYCLE :: JOB_DIR :: ${JOB_DIR}"
+
+    pid_guard $PIDFILE $JOB_NAME
+
+    sudo service circusd restart
+    sudo ${PKG_DIR_NGINX}/sbin/nginx -c ${JOB_DIR}/config/taiga-nginx.conf
+
+    CIRCUS_PID=`ps -ef | grep 'circusd' | grep -v grep | awk '{print $2}' `
+    NGINX_PID=`ps -ef | grep 'nginx: master' | grep -v grep | awk '{print $2}' `
+    echo ${CIRCUS_PID} ${NGINX_PID} > ${PIDFILE}
+
+    echo "##### START :: APP-LIFECYCLE :: SUCCESS :: ${PIDFILE} "
+
+    ;;
+
+  stop)
+
+    echo "##### STOP :: APP-LIFECYCLE :: ${PIDFILE}"
+
+    kill_and_wait $PIDFILE
+
+    ;;
+
+  *)
+    echo "usage: service_ctl {start|stop}"
+    ;;
+
+esac
+exit 0

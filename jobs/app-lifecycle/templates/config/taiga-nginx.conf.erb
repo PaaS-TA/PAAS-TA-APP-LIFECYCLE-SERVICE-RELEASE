@@ -1,0 +1,79 @@
+user  vcap;
+worker_processes  1;
+
+<%
+  def spec_ext_ip
+    if spec.networks.vip.present?
+      spec.networks.vip.ip
+    elsif spec.networks.service_public.present?
+      spec.networks.service_public.ip
+    else
+      spec.address
+    end
+  end
+  TAIGA_SERVER_URL = spec_ext_ip
+%>
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    sendfile        on;
+
+    keepalive_timeout  65;
+
+    server {
+        listen 80 default_server;
+        listen 8000 default_server;
+        server_name _;
+
+        large_client_header_buffers 4 32k;
+        client_max_body_size 50M;
+        charset utf-8;
+
+        access_log /var/vcap/sys/log/app-lifecycle/nginx.access.log;
+        error_log /var/vcap/sys/log/app-lifecycle/nginx.error.log;
+
+        # Frontend
+        location / {
+            root /home/vcap/taiga-front/dist/;
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Backend
+        location /api {
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass http://<%= "#{TAIGA_SERVER_URL}" %>:8001/api;
+            proxy_redirect off;
+        }
+
+        # Django admin access (/admin/)
+        location /admin {
+            proxy_set_header Host $http_host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Scheme $scheme;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass http://<%= "#{TAIGA_SERVER_URL}" %>:8001$request_uri;
+            proxy_redirect off;
+        }
+
+        # Static files
+        location /static {
+            alias /home/vcap/taiga-back/static;
+        }
+
+        # Media files
+        location /media {
+            alias /home/vcap/taiga-back/media;
+        }
+    }
+}

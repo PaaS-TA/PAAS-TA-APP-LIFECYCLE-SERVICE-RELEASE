@@ -1,0 +1,126 @@
+#!/bin/bash
+
+set -e -u
+
+##############################################################################
+### BASE SETTING
+##############################################################################
+
+SCRIPT_NAME=$(basename $0)
+JOB_NAME="app-lifecycle"
+HOME_USER="vcap"
+HOME_DIR="/home/${HOME_USER}"
+SETUP_HISTORY_DIR="${HOME_DIR}/.setup_history"
+PKG_DIR="/var/vcap/packages/${JOB_NAME}"
+JOB_DIR="/var/vcap/jobs/${JOB_NAME}"
+
+RUN_DIR=/var/vcap/sys/run/${JOB_NAME}
+LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
+TMP_DIR=/var/vcap/sys/tmp/${JOB_NAME}
+
+function setup_environment() {
+
+  for dir in ${RUN_DIR} ${LOG_DIR} ${TMP_DIR} ${SETUP_HISTORY_DIR}
+  do
+    mkdir -p ${dir}
+    chown -R vcap:vcap ${dir}
+    chmod 775 ${dir}
+    echo "##### SETUP_ENVIRONMENT :: APP-LIFECYCLE :: ${dir}"
+  done
+
+}
+
+setup_environment
+source /var/vcap/packages/common/syslog_utils.sh
+tee_output_to_sys_log_and_file ${LOG_DIR} ${SCRIPT_NAME}
+
+echo "##### SETUP :: APP-LIFECYCLE :: tmp directory executable"
+sudo mount -o remount,exec /tmp
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: dependencies
+##############################################################################
+
+if [ ! -e ${SETUP_HISTORY_DIR}/dependencies ]; then
+
+    sudo apt update -y
+    echo "##### SETUP :: APP-LIFECYCLE :: dependencies :: START"
+    sudo apt install -y build-essential binutils-doc autoconf flex bison libjpeg-dev libfreetype6-dev zlib1g-dev libzmq3-dev libgdbm-dev libncurses5-dev automake libtool libffi-dev curl git tmux gettext
+
+    echo "##### SETUP :: APP-LIFECYCLE :: dependencies :: END"
+    touch ${SETUP_HISTORY_DIR}/dependencies
+fi
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: mysql-client
+##############################################################################
+
+if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client ]; then
+
+    echo "##### SETUP :: APP-LIFECYCLE :: mysql-client :: START"
+    sudo apt install -y mysql-client
+    echo "##### SETUP :: APP-LIFECYCLE :: mysql-client :: END"
+    touch ${SETUP_HISTORY_DIR}/mysql-client
+fi
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: postgresql
+##############################################################################
+
+if [ ! -e ${SETUP_HISTORY_DIR}/postgresql ]; then
+
+    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: START "
+    sudo apt install -y postgresql-9.5 postgresql-contrib-9.5 postgresql-doc-9.5 postgresql-server-dev-9.5
+
+    sudo -u postgres createuser --superuser ${HOME_USER} &> /dev/null
+    sudo -u postgres createdb taiga &> /dev/null
+
+    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: END"
+    touch ${SETUP_HISTORY_DIR}/postgresql
+fi
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: python
+##############################################################################
+
+if [ ! -e ${SETUP_HISTORY_DIR}/python ]; then
+    echo "##### SETUP :: APP-LIFECYCLE :: python :: START"
+    sudo apt install -y python3 python3-pip python-dev python3-dev python-pip virtualenvwrapper libxml2-dev libxslt-dev libssl-dev
+    echo "##### SETUP :: APP-LIFECYCLE :: python :: END"
+    touch ${SETUP_HISTORY_DIR}/python
+fi
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: taiga package
+##############################################################################
+
+echo "##### SETUP :: APP-LIFECYCLE :: taiga package + config :: START"
+cp -r ${PKG_DIR}/* ${HOME_DIR}
+cp ${JOB_DIR}/config/local.py ${HOME_DIR}/taiga-back/settings/local.py
+cp ${JOB_DIR}/config/initial_user.json ${HOME_DIR}/taiga-back/taiga/users/fixtures/initial_user.json
+cp ${JOB_DIR}/config/conf.json ${HOME_DIR}/taiga-front/dist/conf.json
+sudo chown -R ${HOME_USER}:${HOME_USER} ${HOME_DIR}/*
+echo "##### SETUP :: APP-LIFECYCLE :: taiga package + config :: END"
+
+echo "##### SETUP :: APP-LIFECYCLE :: mkvirtualenv taiga :: START "
+su - ${HOME_USER} -c 'cd /home/vcap/taiga-back; source /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh; $(lsvirtualenv | grep -q taiga) || mkvirtualenv -p /usr/bin/python3 taiga; workon taiga; pip install -r requirements.txt; python manage.py migrate --noinput; python manage.py compilemessages; python manage.py collectstatic --noinput; python manage.py loaddata initial_user; python manage.py loaddata initial_project_templates; (echo <%= p("service.admin_password") %>; echo <%= p("service.admin_password") %>) | python manage.py changepassword admin; (echo <%= p("service.init_password") %>; echo <%= p("service.init_password") %>) | python manage.py changepassword <%= p('service.service_admin') %>; deactivate'
+echo "##### SETUP :: APP-LIFECYCLE :: mkvirtualenv taiga :: END "
+
+##############################################################################
+### APP-LIFECYCLE PRE-START :: circus
+##############################################################################
+
+if [ ! -e ${SETUP_HISTORY_DIR}/circus ]; then
+
+    echo "##### SETUP :: APP-LIFECYCLE :: circus :: START"
+    sudo apt install -y circus
+
+    sudo cp ${JOB_DIR}/config/taiga-circus.ini /etc/circus/conf.d/taiga.ini
+    sudo service circusd stop
+#    sudo service circusd restart
+    echo "##### SETUP :: APP-LIFECYCLE :: circus :: END"
+
+    touch ${SETUP_HISTORY_DIR}/circus
+fi
+
+echo "##### SETUP :: APP-LIFECYCLE :: END "

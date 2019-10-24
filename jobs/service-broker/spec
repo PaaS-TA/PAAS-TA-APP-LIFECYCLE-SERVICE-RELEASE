@@ -41,7 +41,7 @@ properties:
     description: "hibernate logging level"
     default: INFO
   service.init_password:
-    description: "service super admin password"
+    description: "service admin user initial password"
     default: "Service!"
   service.service_admin:
     description: "service admin user"

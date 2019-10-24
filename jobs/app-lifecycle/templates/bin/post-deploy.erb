@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -e -x
+
+<%
+  def spec_ext_ip
+    if spec.networks.vip.present?
+      spec.networks.vip.ip
+    elsif spec.networks.service_public.present?
+      spec.networks.service_public.ip
+    else
+      spec.address
+    end
+  end
+  TAIGA_SERVER_URL = spec_ext_ip
+  DASHBOARD_URL="http://"+spec_ext_ip+"/admin/|http://"+spec_ext_ip+"/discover"
+%>
+
+JOB_ID=<%= spec.id %>
+JOB_NAME=<%= spec.name %>
+SERVER_URL=<%="#{TAIGA_SERVER_URL}"%>
+
+BROKER_DB_URL=<%= link('brokerdb_link').instances[0].address %>
+BROKER_DB_PORT=<%= link('brokerdb_link').p('database.port') %>
+BROKER_SCHEMA=<%= link('brokerdb_link').p('database.broker.schema_name') %>
+BROKER_USERNAME=<%= link('brokerdb_link').p('database.broker.username') %>
+BROKER_PASSWORD=<%= link('brokerdb_link').p('database.broker.password') %>
+
+VM_CHECK_QUERY="SELECT assignment FROM dedicated_vm WHERE vm_ip='${SERVER_URL}' and vm_name='${JOB_NAME}' and vm_id='${JOB_ID}'"
+
+VM_STATUS=`echo ${VM_CHECK_QUERY} | mysql -u ${BROKER_USERNAME} -p${BROKER_PASSWORD} --port $[BROKER_DB_PORT] --host ${BROKER_DB_URL} ${BROKER_SCHEMA} --skip-column-names`
+
+if [[ -z "${VM_STATUS}" || ${VM_STATUS} -eq 1 ]]; then
+
+  echo "##### POST-DEPLOY ::: CHECK VM STATUS :: ${VM_STATUS}"
+  echo "##### POST-DEPLOY ::: INSERT VM INFO ::: $(date +%Y%m%d%H%M%S)"
+
+  INSERT_VM_INFO_QUERY="INSERT INTO dedicated_vm VALUES ('${SERVER_URL}', '${JOB_NAME}', '${JOB_ID}', 0, '<%= "#{DASHBOARD_URL}" %>', NULL, 0, NULL) ON DUPLICATE KEY UPDATE vm_name='${JOB_NAME}', vm_id='${JOB_ID}', assignment=0, dashboard_url='<%= "#{DASHBOARD_URL}" %>', provisioned_time=0, created_time=CURRENT_TIMESTAMP;"
+
+  RESULT=`echo ${INSERT_VM_INFO_QUERY} | mysql -u ${BROKER_USERNAME} -p${BROKER_PASSWORD} --port $[BROKER_DB_PORT] --host ${BROKER_DB_URL} ${BROKER_SCHEMA}`
+
+  echo "##### POST-DEPLOY ::: INSERT VM INFO ::: RESULT ::: $RESULT"
+fi

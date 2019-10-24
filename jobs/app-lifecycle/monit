@@ -1,0 +1,5 @@
+check process app-lifecycle
+  with pidfile /var/vcap/sys/run/app-lifecycle/app-lifecycle.pid
+  start program "/var/vcap/jobs/app-lifecycle/bin/service_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/app-lifecycle/bin/service_ctl stop"
+  group vcap
