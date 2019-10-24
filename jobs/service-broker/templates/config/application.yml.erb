@@ -9,7 +9,7 @@ spring:
   application:
     name: app-lifecycle-service-broker
   datasource:
-    url: jdbc:mysql://<%= link('brokerdb_link').instances[0].address %>:<%= link('brokerdb_link').p('database.port') %>/<%= link('brokerdb_link').p('database.broker.schema_name') %>?autoReconnect=true&useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://<%= link('brokerdb_link').instances[0].address %>:<%= link('brokerdb_link').p('database.port') %>/<%= link('brokerdb_link').p('database.broker.schema_name') %>?zeroDateTimeBehavior=convertToNull&autoReconnect=true&useUnicode=true&characterEncoding=utf8
     username: <%= link('brokerdb_link').p('database.broker.username') %>
     password: <%= link('brokerdb_link').p('database.broker.password') %>
   jpa:
@@ -27,13 +27,21 @@ logging:
     org.paasta.servicebroker.applifecycle: <%= p('logging.level_broker') %>
     org.hibernate: <%= p('logging.level_hibernate') %>
 
-dashboard:
-  url: <%= p('dashboard.url') %>
+service:
+  init_password: <%= p('service.init_password') %>
+  service_admin: <%= p('service.service_admin') %>
+
+bosh:
+  client_id: <%= p('bosh.client.id') %>
+  client_secret: <%= p('bosh.client.secret') %>
+  url: <%= p('bosh.url') %>
+  oauth_url: <%= p('bosh.oauth_url') %>
+  deployment_name: <%= p('bosh.deployment_name') %>
 
 services:
   id: <%= p('services.id') %>
   name: <%= p('services.name') %>
-  description: <%= p('services.description') %>
+  description: "<%= p('services.description') %>"
   bindable: <%= p('services.bindable') %>
   tags:
   metadata:

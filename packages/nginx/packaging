@@ -1,0 +1,27 @@
+set -e -x
+
+ARCHIVE_NGINX="nginx/nginx-1.16.1.tar.gz"
+
+# CHECK EXISTED
+if [[ -f ${ARCHIVE_NGINX} ]] ; then
+  echo "Archive found"
+else
+  echo "Archive not found"
+  exit 1
+fi
+
+# EXTRACT :: ARCHIVE_NGINX
+echo "Extracting :: ARCHIVE_NGINX"
+tar zxvf $ARCHIVE_NGINX
+
+echo "Building nginx..."
+pushd nginx-1.16.1
+  ./configure \
+    --with-debug \
+    --prefix=${BOSH_INSTALL_TARGET} \
+    --without-http_rewrite_module \
+    --without-http_gzip_module
+
+  make
+  make install
+popd

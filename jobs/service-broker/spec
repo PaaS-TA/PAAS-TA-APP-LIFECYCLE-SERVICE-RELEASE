@@ -15,6 +15,16 @@ consumes:
   type: dbconn
 
 properties:
+  bosh.client.id:
+    description: "Bosh client admin ID"
+  bosh.client.secret:
+    description: "Bosh client admin secret"
+  bosh.url:
+    description: "Bosh api url"
+  bosh.oauth_url:
+    description: "Bosh oauth url"
+  bosh.deployment_name:
+    description: "Bosh deployment name"
   java_opts:
     description: "Java options"
     default: "-Xms1024m -Xmx1024m -XX:MetaspaceSize=256m -XX:MaxMetaspaceSize=256m"
@@ -30,9 +40,12 @@ properties:
   logging.level_hibernate:
     description: "hibernate logging level"
     default: INFO
-  dashboard.url:
-    description: "A URI for the service dashboard"
-    default: "http://DASHBOARD-URL/TAIGA/"
+  service.init_password:
+    description: "service super admin password"
+    default: "Service!"
+  service.service_admin:
+    description: "service admin user"
+    default: "serviceadmin"
   services.id:
     description: "An identifier used to correlate this service in future requests to the broker"
     default: "c5faa532-c467-417e-b1fc-e61c1c55844e"
@@ -41,7 +54,7 @@ properties:
     default: "app-lifecycle"
   services.description:
     description: "A short description of the service"
-    default: "A PaaS-TA App LifeCycle Service for application development."
+    default: "A PaaS-TA App LifeCycle Service for application development. Required parameter for provisioning the service. {password: password}"
   services.bindable:
     description: "Specifies whether service instances of the service can be bound to applications"
     default: false
