@@ -10,13 +10,17 @@
 
 ## src directory
 src  
-    ├── common  
-    │   ├── pid_utils.sh  
-    │   └── syslog_utils.sh  
+    ├── app-lifecycle  
+    │   ├── taiga-back-4.2.12.tar.gz  
+    │   └── taiga-front-dist-4.2.12-stable.tar.gz  
+    ├── common
+    │   ├── pid_utils.sh
+    │   └── syslog_utils.sh
     ├── java  
     │   └── OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz  
     ├── mariadb  
     │   └── mariadb-10.3.15-linux-x86_64.tar.gz  
+    ├── nginx  
+    │   └── nginx-1.16.1.tar.gz  
     └── service-broker  
-    │   └── paasta-app-lifecycle-service-broker.jar  
-    
+    │   └── paasta-app-lifecycle-service-broker.jar    
