@@ -5,7 +5,7 @@
 - app-lifecycle-service-broker :: 1 machine
 - mariadb :: 1 machine
 
-### Create PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE
+### Create PaaS-TA APP Lifecycle Service Release
 - Download the latest APP Lifecycle Release
     ```
     $ git clone https://github.com/PaaS-TA/PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE.git
