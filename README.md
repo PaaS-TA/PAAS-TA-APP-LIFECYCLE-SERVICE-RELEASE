@@ -10,9 +10,15 @@
     ```
     $ git clone https://github.com/PaaS-TA/PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE.git
     ```
-- Copy "source files" into the src directory
+- Download & Copy "source files" into the src directory
     ```
-    ## src directory
+    ## download source files
+    $ wget -O source-files.zip http://45.248.73.44/index.php/s/NeEBb9nAQdRQR4F/download
+    
+    ## unzip download source files
+    $ unzip source-files.zip -d <src dircetory path>/
+    
+    ## final src directory
     src  
         ├── app-lifecycle  
         │   ├── taiga-back-4.2.12.tar.gz  
@@ -33,7 +39,7 @@
     ```
     $ cd PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE
     ## <RELEASE_TARBALL_PATH> :: release file path (e.g. /home/ubuntu/workspace/paasta-app-lifecycle-service-release.tgz) 
-    $ bosh create-release --name=paasta-app-lifecycle-service --version=1.0 --tarball=<RELEASE_TARBALL_PATH> --force
+    $ bosh -e <bosh_name> create-release --name=paasta-app-lifecycle-service --version=1.0 --tarball=<RELEASE_TARBALL_PATH> --force
     ```
 
 ### PAAS-TA-APP-LIFECYCLE-SERVICE-DEPLOYMENT
