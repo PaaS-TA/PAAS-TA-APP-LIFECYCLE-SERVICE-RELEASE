@@ -13,10 +13,10 @@
 - Download & Copy "source files" into the src directory
     ```
     ## download source files
-    $ wget -O source-files.zip http://45.248.73.44/index.php/s/NeEBb9nAQdRQR4F/download
+    $ wget -O src.zip https://nextcloud.paas-ta.org/index.php/s/EGEBWjmi5TKj9MP/download
     
     ## unzip download source files
-    $ unzip source-files.zip -d <src dircetory path>/
+    $ unzip src.zip 
     
     ## final src directory
     src  
@@ -29,9 +29,9 @@
         ├── java  
         │   └── OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz  
         ├── mariadb  
-        │   └── mariadb-10.3.15-linux-x86_64.tar.gz  
+        │   └── mariadb-10.5.9-linux-x86_64.tar.gz  
         ├── nginx  
-        │   └── nginx-1.16.1.tar.gz  
+        │   └── nginx-1.19.8.tar.gz  
         └── service-broker  
         │   └── paasta-app-lifecycle-service-broker.jar    
     ```
@@ -39,11 +39,11 @@
     ```
     $ cd PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE
     ## <RELEASE_TARBALL_PATH> :: release file path (e.g. /home/ubuntu/workspace/paasta-app-lifecycle-service-release.tgz) 
-    $ bosh -e <bosh_name> create-release --name=paasta-app-lifecycle-service --version=1.0 --tarball=<RELEASE_TARBALL_PATH> --force
+    $ bosh -e <bosh_name> create-release --name=paasta-app-lifecycle-service --version=1.1.0 --tarball=<RELEASE_TARBALL_PATH> --force
     ```
 
 ### PAAS-TA-APP-LIFECYCLE-SERVICE-DEPLOYMENT
-- https://github.com/PaaS-TA/PAAS-TA-APP-LIFECYCLE-SERVICE-DEPLOYMENT
+- https://github.com/PaaS-TA/service-deployment/tree/master/lifecycle-service
 
 ### 참고 자료
 - https://bosh.io/docs
