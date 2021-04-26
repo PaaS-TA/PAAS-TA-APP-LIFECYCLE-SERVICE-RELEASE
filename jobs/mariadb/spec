@@ -23,6 +23,9 @@ provides:
   - database.broker.schema_name
 
 properties: 
+  mariadb.cce_enable:
+    description: 'mariadb cce_enable'
+    default: false
   database.port:
     description: MariaDB server port
     default: 13306

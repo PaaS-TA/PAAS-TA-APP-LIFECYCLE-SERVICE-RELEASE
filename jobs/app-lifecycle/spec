@@ -22,6 +22,12 @@ consumes:
   type: dbconn
 
 properties:
+  postgres.port:
+    default: 5432
+  postgres.cce_enable:
+    default: false
+  mariadb.cce_enable:
+    default: false
   service.admin_password:
     description: "service super admin password"
     default: "Service!"

@@ -62,3 +62,12 @@ if [ ! -d "${DATA_DIR}" ]; then
   ./scripts/mysql_install_db --defaults-file=${CONF_DIR}/mariadb.cnf --user=vcap
 
 fi
+
+
+##############################################################################
+### CCE enable = <%= p('mariadb.cce_enable') %>
+##############################################################################
+  <% if p('mariadb.cce_enable') %>
+#  mkdir -p /usr/local/mysql/lib
+#  cp -fr /var/vcap/packages/mariadb/lib/plugin /usr/local/mysql/lib
+  <% end %>
