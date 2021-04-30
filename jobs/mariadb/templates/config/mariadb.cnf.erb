@@ -58,6 +58,13 @@ slow_query_log_file     = <%= "#{log_dir}/mariadb-slow.log" %>
 long_query_time         = 10
 log_slow_verbosity      = query_plan
  
+# CCE #####################################################################
+<% if p('mariadb.cce_enable') %>
+slow_query_log          = 1
+plugin_load_add         = auth_ed25519
+<% end %>
+###########################################################################
+
 character_set_server = utf8
  
 #sql_mode=NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES
