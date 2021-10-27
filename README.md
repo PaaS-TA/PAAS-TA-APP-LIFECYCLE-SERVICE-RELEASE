@@ -85,7 +85,7 @@
 - Download & Copy "source files" into the src directory
     ```
     ## download source files
-    $ wget -O src.zip https://nextcloud.paas-ta.org/index.php/s/EGEBWjmi5TKj9MP/download
+    $ wget -O src.zip https://nextcloud.paas-ta.org/index.php/s/mpJd2AZZ23ngg9C/download
     
     ## unzip download source files
     $ unzip src.zip 
@@ -103,7 +103,9 @@
         ├── mariadb  
         │   └── mariadb-10.5.9-linux-x86_64.tar.gz  
         ├── nginx  
-        │   └── nginx-1.19.8.tar.gz  
+        │   └── nginx-1.21.3.tar.gz
+        ├── postgres 
+        │   └── postgresql-11.13.tar.gz
         └── service-broker  
         │   └── paasta-app-lifecycle-service-broker.jar    
     ```
@@ -111,7 +113,7 @@
     ```
     $ cd PAAS-TA-APP-LIFECYCLE-SERVICE-RELEASE
     ## <RELEASE_TARBALL_PATH> :: release file path (e.g. /home/ubuntu/workspace/paasta-app-lifecycle-service-release.tgz) 
-    $ bosh -e <bosh_name> create-release --name=paasta-app-lifecycle-service --version=1.1.0 --tarball=<RELEASE_TARBALL_PATH> --force
+    $ bosh -e <bosh_name> create-release --name=paasta-app-lifecycle-service --version=1.1.1 --tarball=<RELEASE_TARBALL_PATH> --force
     ```
 
 ### PAAS-TA-APP-LIFECYCLE-SERVICE-DEPLOYMENT

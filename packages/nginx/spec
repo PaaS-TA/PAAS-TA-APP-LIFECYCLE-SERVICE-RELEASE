@@ -4,4 +4,4 @@ name: nginx
 dependencies: []
 
 files: 
-- nginx/nginx-1.19.8.tar.gz
+- nginx/nginx-1.21.3.tar.gz

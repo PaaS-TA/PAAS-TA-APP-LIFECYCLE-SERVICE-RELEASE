@@ -9,7 +9,7 @@ set -e -u
 SCRIPT_NAME=$(basename $0)
 JOB_NAME="app-lifecycle"
 HOME_USER="vcap"
-HOME_DIR="/home/${HOME_USER}"
+HOME_DIR="/var/vcap/data/lifecycle"
 SETUP_HISTORY_DIR="${HOME_DIR}/.setup_history"
 PKG_DIR="/var/vcap/packages/${JOB_NAME}"
 JOB_DIR="/var/vcap/jobs/${JOB_NAME}"
@@ -64,12 +64,12 @@ if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client ]; then
 fi
 
 ##############################################################################
-### CCE enable = <%= p('mariadb.cce_enable') %> 
+### CCE enable = <%= p('mariadb.cce_enable') %>
 ##############################################################################
   <% if p('mariadb.cce_enable') %>
 if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client-lib-CCE ]; then
   echo "##### SETUP :: APP-LIFECYCLE :: mysql-client-lib(CCE) :: START"
-  
+
   sudo apt install apt-transport-https -y
   curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
 
@@ -81,119 +81,12 @@ if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client-lib-CCE ]; then
   sudo apt-get install libmariadbclient18 -y
   mkdir -p /usr/lib/mysql/plugin/
   cp /usr/lib/x86_64-linux-gnu/libmariadb3/plugin/client_ed25519.so  /usr/lib/mysql/plugin/
+  mkdir -p /usr/lib/x86_64-linux-gnu/mariadb18/plugin/
+  cp /usr/lib/x86_64-linux-gnu/libmariadb3/plugin/client_ed25519.so  /usr/lib/x86_64-linux-gnu/mariadb18/plugin/
   touch ${SETUP_HISTORY_DIR}/mysql-client-lib-CCE
   echo "##### SETUP :: APP-LIFECYCLE :: mysql-client-lib(CCE) :: END"
 fi
   <% end %>
-
-##############################################################################
-### APP-LIFECYCLE PRE-START :: postgresql
-##############################################################################
-
-if [ ! -e ${SETUP_HISTORY_DIR}/postgresql ]; then
-
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: START "
-    
-    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-    RELEASE=$(lsb_release -cs)
-    echo "deb http://apt.postgresql.org/pub/repos/apt/ ${RELEASE}"-pgdg main | sudo tee  /etc/apt/sources.list.d/pgdg.list
-    cat /etc/apt/sources.list.d/pgdg.list
-
-    ls -l / | grep tmp
-    sudo chmod 1777 /tmp
-
-    sudo apt update
-    sudo apt install -y postgresql-11 postgresql-contrib-11 postgresql-doc-11 postgresql-server-dev-11
-
-    sudo chmod o-w /var/tmp
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: INSTALLED "
-
-    ########################################################
-    # CCE
-    <% if p('postgres.cce_enable') %>
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable START "
-    sudo -u postgres echo "# CCE
-password_encryption= 'scram-sha-256'
-log_statement=all
-log_min_duration_statement = 100 " >> /etc/postgresql/11/main/postgresql.conf
-
-    sudo sed -i 's/local   all             all                                     peer/      scram-sha-256/' /etc/postgresql/11/main/pg_hba.conf
-    sudo sed -i 's/      md5/      scram-sha-256/' /etc/postgresql/11/main/pg_hba.conf
-    sudo sed -i 's/port = 5432/port = <%= p('postgres.port') %>/' /etc/postgresql/11/main/postgresql.conf
-    sudo chmod 600 /etc/postgresql/11/main/*.conf
-    sudo -u postgres psql -p 5432 -d postgres -c "update pg_database set datallowconn = true where datname = 'template0'"
-    sudo service postgresql restart
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: RESTART "
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable END "
-    <% end %>
-    ########################################################
-    
-    sudo -u postgres createuser --superuser ${HOME_USER} &> /dev/null
-    sudo -u postgres createdb taiga &> /dev/null
-
-    echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: END"
-    touch ${SETUP_HISTORY_DIR}/postgresql
-
-fi
-
-##############################################################################
-### APP-LIFECYCLE PRE-START :: python
-##############################################################################
-
-if [ ! -e ${SETUP_HISTORY_DIR}/python ]; then
-    echo "##### SETUP :: APP-LIFECYCLE :: python :: START"
-    sudo apt install -y python3 python3-pip python-dev python3-dev python-pip virtualenvwrapper libxml2-dev libxslt-dev libssl-dev
-    echo "##### SETUP :: APP-LIFECYCLE :: python :: END"
-    touch ${SETUP_HISTORY_DIR}/python
-fi
-
-##############################################################################
-### APP-LIFECYCLE PRE-START :: taiga package
-##############################################################################
-
-echo "##### SETUP :: APP-LIFECYCLE :: taiga package + config :: START"
-cp -r ${PKG_DIR}/* ${HOME_DIR}
-cp ${JOB_DIR}/config/local.py ${HOME_DIR}/taiga-back/settings/local.py
-cp ${JOB_DIR}/config/initial_user.json ${HOME_DIR}/taiga-back/taiga/users/fixtures/initial_user.json
-cp ${JOB_DIR}/config/conf.json ${HOME_DIR}/taiga-front/dist/conf.json
-sudo chown -R ${HOME_USER}:${HOME_USER} ${HOME_DIR}/*
-echo "##### SETUP :: APP-LIFECYCLE :: taiga package + config :: END"
-
-echo "##### SETUP :: APP-LIFECYCLE :: mkvirtualenv taiga :: START "
-ls -sl /home/vcap/taiga-back/settings/common.py
-#[debug]grep -n '"NAME": "taiga",' /home/vcap/taiga-back/settings/common.py 
-
-sudo sed -i'' -r -e '/"NAME": "taiga",/a\        \"PORT\": \"<%= p('postgres.port') %>\",' /home/vcap/taiga-back/settings/common.py 
-#[debug]grep -n 'PORT' /home/vcap/taiga-back/settings/common.py
-
-su - ${HOME_USER} -c 'cd /home/vcap/taiga-back; source /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh; $(lsvirtualenv | grep -q taiga) || mkvirtualenv -p /usr/bin/python3 taiga; workon taiga; pip install -r requirements.txt; python manage.py migrate --noinput; python manage.py compilemessages; python manage.py collectstatic --noinput; python manage.py loaddata initial_user; python manage.py loaddata initial_project_templates; (echo <%= p("service.admin_password") %>; echo <%= p("service.admin_password") %>) | python manage.py changepassword admin; (echo <%= p("service.init_password") %>; echo <%= p("service.init_password") %>) | python manage.py changepassword <%= p('service.service_admin') %>; deactivate'
-
-    ########################################################
-    # CCE
-    <% if p('postgres.cce_enable') %>
-    echo "##### SETUP :: APP-LIFECYCLE :: taiga :: cce_enable START "
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "show password_encryption"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "select usename, passwd from pg_shadow"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "alter user vcap with password '<%= p('service.init_password') %>'"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "alter user postgres with password '<%= p('service.init_password') %>'"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "select usename, passwd from pg_shadow"
-
-    sudo -u postgres psql -p <%= p('postgres.port') %> -c "\l"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -c "\dn+"
-    
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d postgres -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d taiga -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d template0 -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -d template1 -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
-
-    sudo -u postgres psql -p <%= p('postgres.port') %> -c "\l"
-    sudo -u postgres psql -p <%= p('postgres.port') %> -c "\dn+"
-        
-    echo "##### SETUP :: APP-LIFECYCLE :: taiga :: cce_enable END "
-    <% end %>
-    ########################################################
-
-echo "##### SETUP :: APP-LIFECYCLE :: mkvirtualenv taiga :: END "
 
 ##############################################################################
 ### APP-LIFECYCLE PRE-START :: circus
@@ -204,12 +97,11 @@ if [ ! -e ${SETUP_HISTORY_DIR}/circus ]; then
     echo "##### SETUP :: APP-LIFECYCLE :: circus :: START"
     sudo apt install -y circus
 
-    sudo cp ${JOB_DIR}/config/taiga-circus.ini /etc/circus/conf.d/taiga.ini
     sudo service circusd stop
-#    sudo service circusd restart
     echo "##### SETUP :: APP-LIFECYCLE :: circus :: END"
 
     touch ${SETUP_HISTORY_DIR}/circus
 fi
 
 echo "##### SETUP :: APP-LIFECYCLE :: END "
+

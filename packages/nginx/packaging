@@ -1,6 +1,6 @@
 set -e -x
 
-ARCHIVE_NGINX="nginx/nginx-1.19.8.tar.gz"
+ARCHIVE_NGINX="nginx/nginx-1.21.3.tar.gz"
 
 # CHECK EXISTED
 if [[ -f ${ARCHIVE_NGINX} ]] ; then
@@ -15,7 +15,7 @@ echo "Extracting :: ARCHIVE_NGINX"
 tar zxvf $ARCHIVE_NGINX
 
 echo "Building nginx..."
-pushd nginx-1.19.8
+pushd nginx-1.21.3
   ./configure \
     --with-debug \
     --prefix=${BOSH_INSTALL_TARGET} \
