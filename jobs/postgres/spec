@@ -17,7 +17,7 @@ packages:
 properties:
   postgres.port:
     description: 'database server port'
-    default: 5432
+    default: 5524
   postgres.cce_enable:
     default: false
   service.init_password:

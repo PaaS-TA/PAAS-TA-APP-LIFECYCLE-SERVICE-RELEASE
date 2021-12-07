@@ -18,7 +18,7 @@ function main() {
 main
 
 
-sudo -u vcap /var/vcap/packages/postgres/bin/createdb -p 5524 taiga &> /dev/null
+sudo -u vcap /var/vcap/packages/postgres/bin/createdb -p <%= p('postgres.port') %> taiga &> /dev/null
 
 <% if p('postgres.cce_enable') %>
 #CCE
