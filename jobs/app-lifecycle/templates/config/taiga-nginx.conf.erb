@@ -40,7 +40,7 @@ http {
 
         # Frontend
         location / {
-            root /home/vcap/taiga-front/dist/;
+            root /var/vcap/data/lifecycle/taiga-front/dist/;
             try_files $uri $uri/ /index.html;
         }
 
@@ -68,12 +68,12 @@ http {
 
         # Static files
         location /static {
-            alias /home/vcap/taiga-back/static;
+            alias /var/vcap/data/lifecycle/taiga-back/static;
         }
 
         # Media files
         location /media {
-            alias /home/vcap/taiga-back/media;
+            alias /var/vcap/data/lifecycle/taiga-back/media;
         }
     }
 }

@@ -1,5 +1,5 @@
 [watcher:taiga]
-working_dir = /home/vcap/taiga-back
+working_dir = /var/vcap/data/lifecycle/taiga-back
 cmd = gunicorn
 args = -w 3 -t 60 --pythonpath=. -b 0.0.0.0:8001 taiga.wsgi
 uid = vcap

@@ -1,0 +1,19 @@
+# abort script on any command that exits with a non zero value
+set -e
+
+#SRC_NAME=postgresql-11.13.tar.gz
+
+#echo "Extracting postgres ${SRC_NAME}..."
+#tar xzvf ${BOSH_COMPILE_TARGET}/postgres/$SRC_NAME
+#echo "Copying postgres ${SRC_NAME}..."
+#cp -a ${BOSH_COMPILE_TARGET}/* ${BOSH_INSTALL_TARGET}
+
+POSTGRESQL_VERSION=11.13
+
+cd postgres
+tar xfz postgresql-${POSTGRESQL_VERSION}.tar.gz
+cd postgresql-${POSTGRESQL_VERSION}
+./configure  --prefix=${BOSH_INSTALL_TARGET}
+make
+make install
+
