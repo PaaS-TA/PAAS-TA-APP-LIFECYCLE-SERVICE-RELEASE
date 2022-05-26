@@ -8,7 +8,7 @@ set -e
 #echo "Copying postgres ${SRC_NAME}..."
 #cp -a ${BOSH_COMPILE_TARGET}/* ${BOSH_INSTALL_TARGET}
 
-POSTGRESQL_VERSION=11.15
+POSTGRESQL_VERSION=11.16
 
 cd postgres
 tar xfz postgresql-${POSTGRESQL_VERSION}.tar.gz
