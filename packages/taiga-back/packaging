@@ -1,0 +1,19 @@
+set -e -x
+
+ARCHIVE_TAIGA_BACK="app-lifecycle/taiga-back-6.7.0.zip"
+
+# CHECK EXISTED :: TAIGA_BACK 
+if [ -f ${ARCHIVE_TAIGA_BACK} ] ; then
+  echo "Archive found"
+else 
+  echo "Archive not found"
+  exit 1
+fi
+
+# EXTRACT :: TAIGA_BACK
+echo "Extracting ${ARCHIVE_TAIGA_BACK}"
+unzip ${ARCHIVE_TAIGA_BACK}
+
+# COPY
+echo "COPY TAIGA_BACK"
+cp -r ./taiga-back-6.7.0 ${BOSH_INSTALL_TARGET}/taiga-back

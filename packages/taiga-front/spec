@@ -1,0 +1,7 @@
+---
+name: taiga-front
+
+dependencies: []
+
+files: 
+- app-lifecycle/taiga-front-dist-6.7.0.zip

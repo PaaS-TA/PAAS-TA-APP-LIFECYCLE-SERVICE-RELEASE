@@ -1,0 +1,7 @@
+---
+name: taiga-back
+
+dependencies: []
+
+files: 
+- app-lifecycle/taiga-back-6.7.0.zip
