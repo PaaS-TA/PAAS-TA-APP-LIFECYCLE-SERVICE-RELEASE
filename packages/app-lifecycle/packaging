@@ -1,7 +1,7 @@
 set -e -x
 
-ARCHIVE_TAIGA_BACK="app-lifecycle/taiga-back-4.2.12.tar.gz"
-ARCHIVE_TAIGA_FRONT="app-lifecycle/taiga-front-dist-4.2.12-stable.tar.gz"
+ARCHIVE_TAIGA_BACK="app-lifecycle/taiga-back-6.7.0.zip"
+ARCHIVE_TAIGA_FRONT="app-lifecycle/taiga-front-dist-6.7.0.zip"
 
 # CHECK EXISTED :: TAIGA_BACK && TAIGA_FRONT
 if [ -f ${ARCHIVE_TAIGA_BACK} -a -f ${ARCHIVE_TAIGA_FRONT} ] ; then
@@ -13,13 +13,13 @@ fi
 
 # EXTRACT :: TAIGA_BACK
 echo "Extracting ${ARCHIVE_TAIGA_BACK}"
-tar xzf ${ARCHIVE_TAIGA_BACK}
+unzip ${ARCHIVE_TAIGA_BACK}
 
 # EXTRACT :: TAIGA_FRONT
 echo "Extracting ${ARCHIVE_TAIGA_FRONT}"
-tar xzf ${ARCHIVE_TAIGA_FRONT}
+unzip ${ARCHIVE_TAIGA_FRONT}
 
 # COPY
 echo "COPY AIGA_BACK && TAIGA_FRONT"
-cp -r ./taiga-back ${BOSH_INSTALL_TARGET}/taiga-back
-cp -r ./taiga-front-dist ${BOSH_INSTALL_TARGET}/taiga-front
+cp -r ./taiga-back-6.7.0 ${BOSH_INSTALL_TARGET}/taiga-back
+cp -r ./taiga-front-dist-6.7.0 ${BOSH_INSTALL_TARGET}/taiga-front

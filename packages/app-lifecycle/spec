@@ -4,5 +4,5 @@ name: app-lifecycle
 dependencies: []
 
 files: 
-- app-lifecycle/taiga-back-4.2.12.tar.gz
-- app-lifecycle/taiga-front-dist-4.2.12-stable.tar.gz
+- app-lifecycle/taiga-back-6.7.0.zip
+- app-lifecycle/taiga-front-dist-6.7.0.zip
