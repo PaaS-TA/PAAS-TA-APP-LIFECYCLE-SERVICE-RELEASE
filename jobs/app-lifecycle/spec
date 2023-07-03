@@ -6,11 +6,9 @@ templates:
   bin/pre-start.erb: bin/pre-start
   bin/post-start.erb: bin/post-start
   bin/post-deploy.erb: bin/post-deploy
-  config/local.py.erb: config/local.py
-  config/taiga-circus.ini.erb: config/taiga-circus.ini
+  config/config.py.erb: config/config.py
   config/conf.json.erb: config/conf.json
   config/taiga-nginx.conf.erb: config/taiga-nginx.conf
-  config/mime.types: config/mime.types
   config/initial_user.json.erb: config/initial_user.json
 
 packages:
