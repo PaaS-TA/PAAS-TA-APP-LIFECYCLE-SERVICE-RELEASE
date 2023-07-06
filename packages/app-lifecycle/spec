@@ -1,8 +1,0 @@
----
-name: app-lifecycle
-
-dependencies: []
-
-files: 
-- app-lifecycle/taiga-back-6.7.0.zip
-- app-lifecycle/taiga-front-dist-6.7.0.zip

@@ -58,8 +58,10 @@ log_statement=all
 log_min_duration_statement = 100 " >> /var/vcap/jobs/postgres/data/postgresql.conf
 
 sudo sed -i 's/      md5/      scram-sha-256/' /var/vcap/jobs/postgres/data/pg_hba.conf
-sudo sed -i 's/port = 5432/port = 5524/' /var/vcap/jobs/postgres/data/postgresql.conf
+sudo sed -i 's/port = 5432/port = <%= p('postgres.port') %>/' /var/vcap/jobs/postgres/data/postgresql.conf
 sudo chmod 600 /var/vcap/store/postgres/data/*.conf
+
+cp /var/vcap/jobs/postgres/data/postgresql.conf /var/vcap/store/postgres/data
 
 echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable END "
 <% end %>
@@ -67,6 +69,13 @@ echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable END "
 #LIFECYCLE DATE INPUT
 
 su - vcap -c "$PRODUCT_HOME/bin/pg_ctl -D $DATA_DIR start"
+
+TAIGA_DB_CHECK=$(sudo -u vcap /var/vcap/packages/postgres/bin/psql -p 5524 -d postgres -c "\l" | grep "taiga" | cut -d '|' -f 1 | wc -l)
+
+if [ $TAIGA_DB_CHECK -eq 1 ]; then
+   sudo -u vcap /var/vcap/packages/postgres/bin/dropdb -p <%= p('postgres.port') %> taiga &> /dev/null
+fi
+
 
 sudo -u vcap /var/vcap/packages/postgres/bin/createdb -p <%= p('postgres.port') %> taiga &> /dev/null
 

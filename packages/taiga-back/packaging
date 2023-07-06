@@ -1,6 +1,6 @@
 set -e -x
 
-ARCHIVE_TAIGA_BACK="app-lifecycle/taiga-back-6.7.0.zip"
+ARCHIVE_TAIGA_BACK="taiga-back/taiga-back-6.7.0.zip"
 
 # CHECK EXISTED :: TAIGA_BACK 
 if [ -f ${ARCHIVE_TAIGA_BACK} ] ; then
@@ -17,3 +17,5 @@ unzip ${ARCHIVE_TAIGA_BACK}
 # COPY
 echo "COPY TAIGA_BACK"
 cp -r ./taiga-back-6.7.0 ${BOSH_INSTALL_TARGET}/taiga-back
+cp ./taiga-back/gosu-amd64 ${BOSH_INSTALL_TARGET}/gosu
+cp ./taiga-back/get-pip.py ${BOSH_INSTALL_TARGET}/get-pip.py

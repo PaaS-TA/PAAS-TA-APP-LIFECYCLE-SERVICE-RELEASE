@@ -1,6 +1,6 @@
 set -e -x
 
-ARCHIVE_TAIGA_FRONT="app-lifecycle/taiga-front-dist-6.7.0.zip"
+ARCHIVE_TAIGA_FRONT="taiga-front/taiga-front-dist-6.7.0.zip"
 
 # CHECK EXISTED :: TAIGA_FRONT
 if [ -f ${ARCHIVE_TAIGA_FRONT} ] ; then

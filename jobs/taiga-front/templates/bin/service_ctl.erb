@@ -2,7 +2,7 @@
 
 set -e -u
 
-JOB_NAME=app-lifecycle
+JOB_NAME=taiga-front
 SCRIPT_NAME=$(basename $0)
 PKG_DIR_NGINX=/var/vcap/packages/nginx
 JOB_DIR=/var/vcap/jobs/${JOB_NAME}
@@ -19,26 +19,24 @@ case $1 in
 
   start)
 
-    echo "##### STARTING :: APP-LIFECYCLE :: PIDFILE :: ${PIDFILE}"
-    echo "##### STARTING :: APP-LIFECYCLE :: PKG_DIR_NGINX :: ${PKG_DIR_NGINX}"
-    echo "##### STARTING :: APP-LIFECYCLE :: JOB_DIR :: ${JOB_DIR}"
+    echo "##### STARTING :: TAIGA-FRONT :: PIDFILE :: ${PIDFILE}"
+    echo "##### STARTING :: TAIGA-FRONT :: PKG_DIR_NGINX :: ${PKG_DIR_NGINX}"
+    echo "##### STARTING :: TAIGA-FRONT :: JOB_DIR :: ${JOB_DIR}"
 
     pid_guard $PIDFILE $JOB_NAME
 
-    sudo service circusd restart
     sudo ${PKG_DIR_NGINX}/sbin/nginx -c ${JOB_DIR}/config/taiga-nginx.conf
 
-    CIRCUS_PID=`ps -ef | grep 'circusd' | grep -v grep | awk '{print $2}' `
     NGINX_PID=`ps -ef | grep 'nginx: master' | grep -v grep | awk '{print $2}' `
-    echo ${CIRCUS_PID} ${NGINX_PID} > ${PIDFILE}
+    echo ${NGINX_PID} > ${PIDFILE}
 
-    echo "##### START :: APP-LIFECYCLE :: SUCCESS :: ${PIDFILE} "
+    echo "##### START :: TAIGA-FRONT :: SUCCESS :: ${PIDFILE} "
 
     ;;
 
   stop)
 
-    echo "##### STOP :: APP-LIFECYCLE :: ${PIDFILE}"
+    echo "##### STOP :: TAIGA-FRONT :: ${PIDFILE}"
 
     kill_and_wait $PIDFILE
 

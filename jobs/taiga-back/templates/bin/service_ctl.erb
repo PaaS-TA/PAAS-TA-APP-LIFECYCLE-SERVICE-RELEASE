@@ -1,0 +1,64 @@
+#!/bin/bash
+
+set -e -u
+
+JOB_NAME=taiga-back
+SCRIPT_NAME=$(basename $0)
+JOB_DIR=/var/vcap/jobs/${JOB_NAME}
+LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
+RUN_DIR=/var/vcap/sys/run/${JOB_NAME}
+PIDFILE=${RUN_DIR}/${JOB_NAME}.pid
+HOME_DIR="/var/vcap/data/lifecycle"
+
+source /var/vcap/packages/common/syslog_utils.sh
+source /var/vcap/packages/common/pid_utils.sh
+
+tee_output_to_sys_log_and_file ${LOG_DIR} ${SCRIPT_NAME}
+
+case $1 in
+
+  start)
+
+    echo "##### STARTING :: TAIGA BACK :: PIDFILE :: ${PIDFILE}"
+    echo "##### STARTING :: TAIGA BACK :: JOB_DIR :: ${JOB_DIR}"
+
+    pid_guard $PIDFILE $JOB_NAME
+
+    cd ${HOME_DIR}/${JOB_NAME}
+
+    python3 manage.py migrate
+    python3 manage.py loaddata initial_project_templates
+    python3 manage.py loaddata initial_user; 
+
+
+    exec gosu vcap gunicorn taiga.wsgi:application \
+        --name taiga_api \
+        --bind 0.0.0.0:8000 \
+        --workers 3 \
+        --worker-tmp-dir /dev/shm \
+        --log-level=info \
+        --access-logfile ${LOG_DIR}/taiga-back.log \
+        &
+
+
+    TAIGA_BACK_PID=`ps -ef | grep 'taiga_api' | head -n 1 | grep -v grep | awk '{print $2}' `
+    echo ${TAIGA_BACK_PID} > ${PIDFILE}
+
+    echo "##### START :: TAIGA BACK :: SUCCESS :: ${PIDFILE} "
+
+    ;;
+
+  stop)
+
+    echo "##### STOP :: APP-LIFECYCLE :: ${PIDFILE}"
+
+    kill_and_wait $PIDFILE
+
+    ;;
+
+  *)
+    echo "usage: service_ctl {start|stop}"
+    ;;
+
+esac
+exit 0
