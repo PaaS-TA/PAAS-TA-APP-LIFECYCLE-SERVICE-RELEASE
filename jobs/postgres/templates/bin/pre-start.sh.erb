@@ -70,7 +70,7 @@ echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable END "
 
 su - vcap -c "$PRODUCT_HOME/bin/pg_ctl -D $DATA_DIR start"
 
-TAIGA_DB_CHECK=$(sudo -u vcap /var/vcap/packages/postgres/bin/psql -p 5524 -d postgres -c "\l" | grep "taiga" | cut -d '|' -f 1 | wc -l)
+TAIGA_DB_CHECK=$(sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\l" | grep "taiga" | cut -d '|' -f 1 | wc -l)
 
 if [ $TAIGA_DB_CHECK -eq 1 ]; then
    sudo -u vcap /var/vcap/packages/postgres/bin/dropdb -p <%= p('postgres.port') %> taiga &> /dev/null
