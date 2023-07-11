@@ -1,0 +1,5 @@
+check process taiga-front
+  with pidfile /var/vcap/sys/run/taiga-front/taiga-front.pid
+  start program "/var/vcap/jobs/taiga-front/bin/service_ctl start" with timeout 60 seconds
+  stop program "/var/vcap/jobs/taiga-front/bin/service_ctl stop"
+  group vcap

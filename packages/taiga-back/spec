@@ -1,0 +1,9 @@
+---
+name: taiga-back
+
+dependencies: []
+
+files: 
+- taiga-back/taiga-back-6.7.0.zip
+- taiga-back/gosu-amd64
+- taiga-back/get-pip.py

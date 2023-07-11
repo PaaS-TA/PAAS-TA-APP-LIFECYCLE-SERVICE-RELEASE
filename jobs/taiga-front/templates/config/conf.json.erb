@@ -1,0 +1,51 @@
+<%
+  def spec_ext_ip
+    if spec.networks.vip.present?
+      spec.networks.vip.ip
+    elsif spec.networks.service_public.present?
+      spec.networks.service_public.ip
+    else
+      spec.address
+    end
+  end
+  TAIGA_SERVER_URL = spec_ext_ip
+%>
+
+{
+    "api": "http://<%= "#{TAIGA_SERVER_URL}" %>:8000/api/v1/",
+    "eventsUrl": null,
+    "baseHref": "/",
+    "eventsMaxMissedHeartbeats": 5,
+    "eventsHeartbeatIntervalTime": 60000,
+    "eventsReconnectTryInterval": 10000,
+    "debug": false,
+    "debugInfo": false,
+    "defaultLanguage": "en",
+    "themes": [
+        "taiga"
+    ],
+    "defaultTheme": "taiga",
+    "defaultLoginEnabled": true,
+    "publicRegisterEnabled": true,
+    "feedbackEnabled": true,
+    "supportUrl": "https://community.taiga.io/",
+    "privacyPolicyUrl": null,
+    "termsOfServiceUrl": null,
+    "maxUploadFileSize": null,
+    "contribPlugins": [],
+    "tagManager": {
+        "accountId": null
+    },
+    "tribeHost": null,
+    "enableAsanaImporter": false,
+    "enableGithubImporter": false,
+    "enableJiraImporter": false,
+    "enableTrelloImporter": false,
+    "gravatar": false,
+    "rtlLanguages": [
+        "ar",
+        "fa",
+        "he"
+    ]
+}
+

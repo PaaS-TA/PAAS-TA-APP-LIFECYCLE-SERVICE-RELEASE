@@ -16,6 +16,8 @@ PACKAGE_DATA_DIR=/var/vcap/data/packages/${PACKAGE_NAME}
 JOB_DATA_DIR=/var/vcap/data/jobs/${PACKAGE_NAME}
 JOB_DIR=/var/vcap/jobs/${PACKAGE_NAME}/data
 
+export PRODUCT_HOME=/var/vcap/packages/$PACKAGE_NAME
+
 function init_data_dir(){
   if [ ! -f "${DATA_DIR}/postgresql.conf" ]; then
     # initdb creates data directories
@@ -40,8 +42,6 @@ function main() {
   mkdir -p "${RUN_DIR}"
   chown -R vcap:vcap "${RUN_DIR}"
 
-  chmod 777 "${JOB_DIR}/postgresql-init.sh"
-  chmod 777 "${JOB_DIR}/postgresql.sql"
   sysctl -w "kernel.shmmax=284934144"
 }
 
@@ -58,8 +58,46 @@ log_statement=all
 log_min_duration_statement = 100 " >> /var/vcap/jobs/postgres/data/postgresql.conf
 
 sudo sed -i 's/      md5/      scram-sha-256/' /var/vcap/jobs/postgres/data/pg_hba.conf
-sudo sed -i 's/port = 5432/port = 5524/' /var/vcap/jobs/postgres/data/postgresql.conf
+sudo sed -i 's/port = 5432/port = <%= p('postgres.port') %>/' /var/vcap/jobs/postgres/data/postgresql.conf
 sudo chmod 600 /var/vcap/store/postgres/data/*.conf
+
+cp /var/vcap/jobs/postgres/data/postgresql.conf /var/vcap/store/postgres/data
 
 echo "##### SETUP :: APP-LIFECYCLE :: postgresql :: cce_enable END "
 <% end %>
+
+#LIFECYCLE DATE INPUT
+
+su - vcap -c "$PRODUCT_HOME/bin/pg_ctl -D $DATA_DIR start"
+
+TAIGA_DB_CHECK=$(sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\l" | grep "taiga" | cut -d '|' -f 1 | wc -l)
+
+if [ $TAIGA_DB_CHECK -eq 1 ]; then
+   sudo -u vcap /var/vcap/packages/postgres/bin/dropdb -p <%= p('postgres.port') %> taiga &> /dev/null
+fi
+
+
+sudo -u vcap /var/vcap/packages/postgres/bin/createdb -p <%= p('postgres.port') %> taiga &> /dev/null
+
+
+#CCE
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "update pg_database set datallowconn = true where datname = 'template0'"
+
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "show password_encryption"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "select usename, passwd from pg_shadow"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "alter user vcap with password '<%= p('service.init_password') %>'"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "select usename, passwd from pg_shadow"
+
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\l"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\dn+"
+
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d taiga -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d template0 -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d template1 -c "REVOKE ALL ON SCHEMA public FROM PUBLIC"
+
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\l"
+sudo -u vcap /var/vcap/packages/postgres/bin/psql -p <%= p('postgres.port') %> -d postgres -c "\dn+"
+
+
+su - vcap -c "$PRODUCT_HOME/bin/pg_ctl -D $DATA_DIR stop"

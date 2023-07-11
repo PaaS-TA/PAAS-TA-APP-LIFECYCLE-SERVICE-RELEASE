@@ -85,29 +85,33 @@
 - Download & Copy "source files" into the src directory
     ```
     ## download source files
-    $ wget -O src.zip  https://nextcloud.paas-ta.org/index.php/s/qksWX6iygDeQRSg/download
+    $ wget -O src.zip  https://nextcloud.paas-ta.org/index.php/s/w2YX6w64D5Baj6D/download
     
     ## unzip download source files
     $ unzip src.zip 
     
     ## final src directory
-    src  
-        ├── app-lifecycle  
-        │   ├── taiga-back-4.2.12.tar.gz  
-        │   └── taiga-front-dist-4.2.12-stable.tar.gz  
-        ├── common  
-        │   ├── pid_utils.sh  
-        │   └── syslog_utils.sh  
-        ├── java  
-        │   └── OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz  
-        ├── mariadb  
-        │   └── mariadb-10.5.17-linux-x86_64.tar.gz  
-        ├── nginx  
-        │   └── nginx-1.21.3.tar.gz
-        ├── postgres 
-        │   └── postgresql-11.17.tar.gz
-        └── service-broker  
-        │   └── paasta-app-lifecycle-service-broker.jar    
+    src
+    ├── common
+    │   ├── pid_utils.sh
+    │   └── syslog_utils.sh
+    ├── java
+    │   └── OpenJDK8U-jre_x64_linux_hotspot_8u212b03.tar.gz
+    ├── mariadb
+    │   └── mariadb-10.5.17-linux-x86_64.tar.gz
+    ├── nginx
+    │   └── nginx-1.21.3.tar.gz
+    ├── postgres
+    │   ├── downloaurl
+    │   └── postgresql-11.17.tar.gz
+    ├── service-broker
+    │   └── paasta-app-lifecycle-service-broker.jar
+    ├── taiga-back
+    │   ├── get-pip.py
+    │   ├── gosu-amd64
+    │   └── taiga-back-6.7.0.zip
+    └── taiga-front
+        └── taiga-front-dist-6.7.0.zip
     ```
 - Create APP Lifecycle Release
     ```

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e -u
+
+cd /var/vcap/data/lifecycle/taiga-back
+
+echo '
+from django.contrib.auth import get_user_model; 
+User = get_user_model(); 
+u=User.objects.get(username="admin");
+u.set_password("<%= p("service.admin_password") %>");
+u.save();
+' | python3 manage.py shell
+
+echo '
+from django.contrib.auth import get_user_model;
+User = get_user_model();
+u=User.objects.get(username="<%= p('service.service_admin') %>");
+u.set_password("<%= p('service.init_password') %>");
+u.save();
+' | python3 manage.py shell

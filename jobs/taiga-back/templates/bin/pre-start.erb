@@ -7,7 +7,7 @@ set -e -u
 ##############################################################################
 
 SCRIPT_NAME=$(basename $0)
-JOB_NAME="app-lifecycle"
+JOB_NAME="taiga-back"
 HOME_USER="vcap"
 HOME_DIR="/var/vcap/data/lifecycle"
 SETUP_HISTORY_DIR="${HOME_DIR}/.setup_history"
@@ -38,17 +38,24 @@ echo "##### SETUP :: APP-LIFECYCLE :: tmp directory executable"
 sudo mount -o remount,exec /tmp
 
 ##############################################################################
-### APP-LIFECYCLE PRE-START :: dependencies
+### APP-LIFECYCLE PRE-START :: system_dependencies
 ##############################################################################
 
-if [ ! -e ${SETUP_HISTORY_DIR}/dependencies ]; then
+if [ ! -e ${SETUP_HISTORY_DIR}/system_dependencies ]; then
 
     sudo apt update -y
-    echo "##### SETUP :: APP-LIFECYCLE :: dependencies :: START"
-    sudo apt install -y build-essential binutils-doc autoconf flex bison libjpeg-dev libfreetype6-dev zlib1g-dev libzmq3-dev libgdbm-dev libncurses5-dev automake libtool libffi-dev curl git tmux gettext
+    echo "##### SETUP :: APP-LIFECYCLE :: system dependencies :: START"
+    apt-get install -y build-essential gettext libpq5 libpq-dev git net-tools procps wget;
 
-    echo "##### SETUP :: APP-LIFECYCLE :: dependencies :: END"
-    touch ${SETUP_HISTORY_DIR}/dependencies
+    cp ${PKG_DIR}/gosu /usr/bin/gosu
+    chmod +x /usr/bin/gosu; 
+
+    python3 ${PKG_DIR}/get-pip.py
+    sudo apt-get -y install python3-dev
+
+    echo "##### SETUP :: APP-LIFECYCLE :: system_dependencies :: END"
+    touch ${SETUP_HISTORY_DIR}/system_dependencies
+
 fi
 
 ##############################################################################
@@ -58,7 +65,21 @@ fi
 if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client ]; then
 
     echo "##### SETUP :: APP-LIFECYCLE :: mariadb-client :: START"
-    sudo apt install -y mariadb-client
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get upgrade -y
+    apt-get install -y wget lsb-release gnupg
+
+    debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/unsupported-platform select ubuntu bionic'
+    debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/select-server select mysql-5.7'
+    debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-codename select bionic'
+    debconf-set-selections <<< 'mysql-apt-config mysql-apt-config/repo-distro select ubuntu'
+
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+    dpkg -i mysql-apt-config_0.8.12-1_all.deb
+    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+    apt-get update
+    apt-get install -y -f mysql-client=5.7*
     echo "##### SETUP :: APP-LIFECYCLE :: mariadb-client :: END"
     touch ${SETUP_HISTORY_DIR}/mysql-client
 fi
@@ -89,18 +110,35 @@ fi
   <% end %>
 
 ##############################################################################
-### APP-LIFECYCLE PRE-START :: circus
+### APP-LIFECYCLE PRE-START :: Taiga dependencies
 ##############################################################################
 
-if [ ! -e ${SETUP_HISTORY_DIR}/circus ]; then
+if [ ! -e ${SETUP_HISTORY_DIR}/taiga_dependencies ]; then
 
-    echo "##### SETUP :: APP-LIFECYCLE :: circus :: START"
-    sudo apt install -y circus
+    echo "##### SETUP :: APP-LIFECYCLE :: Taiga dependencies :: START"
 
-    sudo service circusd stop
-    echo "##### SETUP :: APP-LIFECYCLE :: circus :: END"
+    cp -r ${PKG_DIR}/${JOB_NAME} ${HOME_DIR}
 
-    touch ${SETUP_HISTORY_DIR}/circus
+    cd ${HOME_DIR}/${JOB_NAME}
+
+    python3 -m pip install --upgrade pip; 
+    python3 -m pip install wheel; 
+    python3 -m pip install -r requirements.txt; 
+    python3 -m pip install -r requirements-contribs.txt; 
+    
+    python3 -m pip install -U pyopenssl cryptography
+    python3 manage.py compilemessages; 
+    python3 manage.py collectstatic --no-input; 
+
+    mv /usr/local/bin/gunicorn /usr/bin/
+
+    mkdir -p media/exports;
+    cp ${JOB_DIR}/config/initial_user.json ${HOME_DIR}/taiga-back/taiga/users/fixtures/initial_user.json
+    cp ${JOB_DIR}/config/common.py ${HOME_DIR}/taiga-back/settings/common.py
+
+    echo "##### SETUP :: APP-LIFECYCLE :: Taiga dependencies :: END"
+
+    touch ${SETUP_HISTORY_DIR}/taiga_dependencies
 fi
 
 echo "##### SETUP :: APP-LIFECYCLE :: END "

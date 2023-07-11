@@ -1,22 +1,18 @@
 ---
-name: app-lifecycle
+name: taiga-back
 
 templates: 
   bin/service_ctl.erb: bin/service_ctl
   bin/pre-start.erb: bin/pre-start
   bin/post-start.erb: bin/post-start
   bin/post-deploy.erb: bin/post-deploy
-  config/local.py.erb: config/local.py
-  config/taiga-circus.ini.erb: config/taiga-circus.ini
-  config/conf.json.erb: config/conf.json
-  config/taiga-nginx.conf.erb: config/taiga-nginx.conf
-  config/mime.types: config/mime.types
+  config/common.py.erb: config/common.py
   config/initial_user.json.erb: config/initial_user.json
 
 packages:
 - common
 - nginx
-- app-lifecycle
+- taiga-back
 
 consumes:
 - name: brokerdb_link

@@ -1,0 +1,15 @@
+---
+name: taiga-front
+
+templates: 
+  bin/service_ctl.erb: bin/service_ctl
+  bin/pre-start.erb: bin/pre-start
+  config/conf.json.erb: config/conf.json
+  config/taiga-nginx.conf.erb: config/taiga-nginx.conf
+  config/mime.types: config/mime.types
+
+packages:
+- common
+- nginx
+- taiga-front
+

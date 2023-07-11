@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -e -u
+
+##############################################################################
+### BASE SETTING
+##############################################################################
+
+SCRIPT_NAME=$(basename $0)
+JOB_NAME="taiga-front"
+HOME_USER="vcap"
+HOME_DIR="/var/vcap/data/lifecycle"
+SETUP_HISTORY_DIR="${HOME_DIR}/.setup_history"
+PKG_DIR="/var/vcap/packages/${JOB_NAME}"
+JOB_DIR="/var/vcap/jobs/${JOB_NAME}"
+
+RUN_DIR=/var/vcap/sys/run/${JOB_NAME}
+LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
+TMP_DIR=/var/vcap/sys/tmp/${JOB_NAME}
+
+function setup_environment() {
+
+  for dir in ${RUN_DIR} ${LOG_DIR} ${TMP_DIR} ${SETUP_HISTORY_DIR}
+  do
+    mkdir -p ${dir}
+    chown -R vcap:vcap ${dir}
+    chmod 775 ${dir}
+    echo "##### SETUP_ENVIRONMENT :: APP-LIFECYCLE :: ${dir}"
+  done
+
+}
+
+setup_environment
+source /var/vcap/packages/common/syslog_utils.sh
+tee_output_to_sys_log_and_file ${LOG_DIR} ${SCRIPT_NAME}
+
+
+##############################################################################
+### TAIGA-FRONT PRE-START
+##############################################################################
+
+echo "##### SETUP :: TAIGA-FRONT :: START "
+chmod 644 ${JOB_DIR}/config/conf.json
+cp ${JOB_DIR}/config/conf.json ${PKG_DIR}/taiga-front/dist
+cp -r ${PKG_DIR}/* ${HOME_DIR}
+
+echo "##### SETUP :: TAIGA-FRONT :: END "
+
