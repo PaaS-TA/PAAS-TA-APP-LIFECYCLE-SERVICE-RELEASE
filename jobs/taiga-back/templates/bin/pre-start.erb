@@ -18,6 +18,8 @@ RUN_DIR=/var/vcap/sys/run/${JOB_NAME}
 LOG_DIR=/var/vcap/sys/log/${JOB_NAME}
 TMP_DIR=/var/vcap/sys/tmp/${JOB_NAME}
 
+export GNUTLS_CPUID_OVERRIDE=0x1 
+
 function setup_environment() {
 
   for dir in ${RUN_DIR} ${LOG_DIR} ${TMP_DIR} ${SETUP_HISTORY_DIR}
@@ -43,7 +45,7 @@ sudo mount -o remount,exec /tmp
 
 if [ ! -e ${SETUP_HISTORY_DIR}/system_dependencies ]; then
 
-    sudo apt update -y
+    apt update -y
     echo "##### SETUP :: APP-LIFECYCLE :: system dependencies :: START"
     apt-get install -y build-essential gettext libpq5 libpq-dev git net-tools procps wget;
 
@@ -51,7 +53,7 @@ if [ ! -e ${SETUP_HISTORY_DIR}/system_dependencies ]; then
     chmod +x /usr/bin/gosu; 
 
     python3 ${PKG_DIR}/get-pip.py
-    sudo apt-get -y install python3-dev
+    apt-get -y install python3-dev
 
     echo "##### SETUP :: APP-LIFECYCLE :: system_dependencies :: END"
     touch ${SETUP_HISTORY_DIR}/system_dependencies
@@ -77,7 +79,7 @@ if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client ]; then
 
     wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
     dpkg -i mysql-apt-config_0.8.12-1_all.deb
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
     apt-get update
     apt-get install -y -f mysql-client=5.7*
     echo "##### SETUP :: APP-LIFECYCLE :: mariadb-client :: END"
@@ -91,15 +93,15 @@ fi
 if [ ! -e ${SETUP_HISTORY_DIR}/mysql-client-lib-CCE ]; then
   echo "##### SETUP :: APP-LIFECYCLE :: mysql-client-lib(CCE) :: START"
 
-  sudo apt install apt-transport-https -y
+  apt install apt-transport-https -y
   curl -sS https://downloads.mariadb.com/MariaDB/mariadb_repo_setup | sudo bash
 
-  sudo apt-get install software-properties-common -y
+  apt-get install software-properties-common -y
   #sudo add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://sfo1.mirrors.digitalocean.com/mariadb/repo/10.3/ubuntu bionic main'
 
-  sudo apt update -y
+  apt update -y
 
-  sudo apt-get install libmariadbclient18 -y
+  apt-get install libmariadbclient18 -y
   mkdir -p /usr/lib/mysql/plugin/
   cp /usr/lib/x86_64-linux-gnu/libmariadb3/plugin/client_ed25519.so  /usr/lib/mysql/plugin/
   mkdir -p /usr/lib/x86_64-linux-gnu/mariadb18/plugin/
